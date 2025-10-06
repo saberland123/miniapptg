@@ -4,25 +4,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const tg = window.Telegram.WebApp;
     tg.expand(); // Раскрываем приложение на весь экран
 
-    // --- ДАННЫЕ ПРИЛОЖЕНИЯ (ВРЕМЕННОЕ ХРАНИЛИЩЕ) ---
-    // В реальном приложении это будет приходить с сервера
+    // ❗️❗️❗️ ВАЖНО: Заменили на ваш туннель serveo.net
+    const BACKEND_URL = 'https://a06ad93ccdde5fcddf7a424f8637a937.serveo.net';
+
+    // Данные теперь будут приходить с бэкенда, а не храниться здесь
     let appData = {
-        plan: [
-            { day: "Понедельник", exercises: [], isRestDay: false },
-            { day: "Вторник", exercises: [], isRestDay: false },
-            { day: "Среда", exercises: [], isRestDay: false },
-            { day: "Четверг", exercises: [], isRestDay: false },
-            { day: "Пятница", exercises: [], isRestDay: false },
-            { day: "Суббота", exercises: [], isRestDay: true },
-            { day: "Воскресенье", exercises: [], isRestDay: true },
-        ],
-        profile: {
-            completedDays: 0,
-            completedWeeks: 0,
-            progress: "0/5"
-        }
+        plan: [],
+        profile: {} // Профиль пока оставим пустым
     };
     let currentEditingDayIndex = null;
+    const dayNames = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
 
     // --- ПОЛУЧЕНИЕ ЭЛЕМЕНТОВ СТРАНИЦЫ ---
     const screens = document.querySelectorAll('.screen');
@@ -49,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => showScreen('home-screen'));
     });
 
-
     // --- ЛОГИКА РЕНДЕРИНГА (ОТОБРАЖЕНИЕ ДАННЫХ) ---
     
     // Функция для отрисовки плана на неделю
@@ -68,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 : `${dayData.exercises.length} упр.`;
 
             dayCard.innerHTML = `
-                <span class="day-name">${dayData.day}</span>
+                <span class="day-name">${dayNames[index]}</span>
                 <span class="exercise-count">${exerciseCountText}</span>
             `;
             
@@ -83,9 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Функция для отрисовки профиля
     function renderProfile() {
-        document.getElementById('stat-days').textContent = appData.profile.completedDays;
-        document.getElementById('stat-weeks').textContent = appData.profile.completedWeeks;
-        document.getElementById('stat-progress').textContent = appData.profile.progress;
+        if (appData.profile) {
+            document.getElementById('stat-days').textContent = appData.profile.completedDays || 0;
+            document.getElementById('stat-weeks').textContent = appData.profile.completedWeeks || 0;
+            document.getElementById('stat-progress').textContent = appData.profile.progress || "0/0";
+        }
     }
 
     // --- ЛОГИКА МОДАЛЬНОГО ОКНА ---
@@ -94,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentEditingDayIndex = dayIndex;
         const dayData = appData.plan[dayIndex];
 
-        document.getElementById('modal-day-title').textContent = `Упражнения на ${dayData.day}`;
+        document.getElementById('modal-day-title').textContent = `Упражнения на ${dayNames[dayIndex]}`;
         
         // Отрисовываем список упражнений
         renderExercisesList(dayData.exercises);
@@ -130,6 +122,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- НОВЫЕ ФУНКЦИИ ДЛЯ РАБОТЫ С API ---
+
+    async function loadPlan() {
+        try {
+            tg.MainButton.showProgress(); // Показываем крутилку загрузки
+            const response = await fetch(`${BACKEND_URL}/api/plan`, {
+                method: 'GET',
+                headers: {
+                    // Отправляем данные для аутентификации
+                    'Authorization': `tma ${tg.initData}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Ошибка при загрузке плана: ' + await response.text());
+            }
+            const planFromServer = await response.json();
+            appData.plan = planFromServer;
+            renderWeekPlan();
+        } catch (error) {
+            console.error(error);
+            tg.showAlert('Не удалось загрузить ваш план. Попробуйте позже.');
+            // Если сервер недоступен, используем временные данные
+            appData.plan = dayNames.map(day => ({ 
+                day, 
+                exercises: [], 
+                isRestDay: false 
+            }));
+            renderWeekPlan();
+        } finally {
+            tg.MainButton.hideProgress();
+        }
+    }
+
+    async function savePlan() {
+        try {
+            tg.MainButton.showProgress();
+            const response = await fetch(`${BACKEND_URL}/api/plan`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `tma ${tg.initData}`
+                },
+                body: JSON.stringify({ plan: appData.plan })
+            });
+            if (!response.ok) {
+                throw new Error('Ошибка при сохранении плана: ' + await response.text());
+            }
+            tg.HapticFeedback.notificationOccurred('success');
+            console.log('План успешно сохранен на сервере');
+        } catch (error) {
+            console.error(error);
+            tg.showAlert('Не удалось сохранить план. Проверьте интернет-соединение.');
+        } finally {
+            tg.MainButton.hideProgress();
+        }
+    }
+
     // --- ОБРАБОТКА СОБЫТИЙ ФОРМ И КНОПОК ---
 
     // Закрытие модального окна
@@ -150,6 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderExercisesList(appData.plan[currentEditingDayIndex].exercises);
             renderWeekPlan();
 
+            // Сохраняем на сервер
+            savePlan();
+
             // Очищаем форму
             e.target.reset();
             tg.HapticFeedback.impactOccurred('light'); // Легкая вибрация
@@ -165,6 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 renderExercisesList(appData.plan[currentEditingDayIndex].exercises);
                 renderWeekPlan();
+                
+                // Сохраняем на сервер
+                savePlan();
+                
                 tg.HapticFeedback.notificationOccurred('warning'); // Вибрация-предупреждение
             }
         }
@@ -172,10 +228,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- НАЧАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ---
     
+    // Настраиваем главную кнопку Telegram
+    tg.MainButton.setText('Сохранить и закрыть');
+    tg.onEvent('mainButtonClicked', () => {
+        savePlan().then(() => {
+            tg.close();
+        });
+    });
+
     // Устанавливаем имя пользователя
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         document.getElementById('user-name').textContent = tg.initDataUnsafe.user.first_name;
     }
+
+    // Загружаем план с сервера при старте
+    loadPlan().then(() => {
+        showScreen('home-screen');
+        tg.MainButton.show(); // Показываем кнопку после загрузки
+    });
 
     // Показываем главный экран при запуске
     showScreen('home-screen');
