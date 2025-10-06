@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tg.expand(); // Раскрываем приложение на весь экран
 
     // ❗️❗️❗️ ВАЖНО: Заменили на ваш туннель serveo.net
-    const BACKEND_URL = 'https://a06ad93ccdde5fcddf7a424f8637a937.serveo.net';
+    const BACKEND_URL = 'https://r80rmtgpa.localto.net/';
 
     // Данные теперь будут приходить с бэкенда, а не храниться здесь
     let appData = {
