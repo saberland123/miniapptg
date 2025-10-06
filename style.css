@@ -1,0 +1,194 @@
+/* --- Основные переменные и стили из ТЗ --- */
+:root {
+    --bg-color: #121212;
+    --primary-text-color: #FFFFFF;
+    --secondary-text-color: #A0A0A0;
+    --accent-color: #BB86FC;
+    --card-bg-color: #1E1E1E; /* Чуть светлее фона для карточек */
+    --button-text-color: #FFFFFF;
+    --border-radius: 12px;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    overscroll-behavior: none; /* Убирает "оттягивание" страницы на мобильных */
+}
+
+/* --- Структура экранов --- */
+.screen {
+    display: none; /* Все экраны по умолчанию скрыты */
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 100vh;
+}
+.screen.active {
+    display: block; /* Показываем только активный экран */
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+header h1 { margin: 0; }
+header h2 { margin: 10px 0; }
+header p { color: var(--secondary-text-color); }
+
+.back-button {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: none;
+    border: none;
+    color: var(--primary-text-color);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* --- Главное меню --- */
+.menu {
+    display: grid;
+    gap: 15px;
+}
+.menu-button {
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    background-color: var(--card-bg-color);
+    color: var(--primary-text-color);
+    border: 1px solid var(--accent-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.menu-button:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+.menu-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--secondary-text-color);
+}
+
+
+/* --- Экран "План на неделю" --- */
+#week-plan-container {
+    display: grid;
+    gap: 10px;
+}
+.day-card {
+    background-color: var(--card-bg-color);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.day-card.rest-day {
+    background-color: #333;
+    color: var(--secondary-text-color);
+}
+.day-card .day-name {
+    font-weight: bold;
+}
+.day-card .exercise-count {
+    font-size: 14px;
+    color: var(--secondary-text-color);
+}
+
+
+/* --- Экран "Профиль" --- */
+.profile-stats {
+    display: grid;
+    gap: 15px;
+}
+.stat-card {
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+.stat-card h3 {
+    margin: 0 0 10px 0;
+    color: var(--secondary-text-color);
+    font-size: 16px;
+}
+.stat-card p {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+
+/* --- Модальное окно --- */
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+#add-exercise-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+input[type="text"], input[type="number"] {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--secondary-text-color);
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    font-size: 16px;
+}
+button {
+    padding: 15px;
+    border-radius: 8px;
+    border: none;
+    background-color: var(--accent-color);
+    color: var(--button-text-color);
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#modal-close-btn {
+    background-color: #555;
+    margin-top: 10px;
+}
+#exercises-list .exercise-item {
+    background-color: var(--bg-color);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.exercise-item .delete-btn {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 18px;
+}

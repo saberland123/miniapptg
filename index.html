@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TrainPlan</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Основной контейнер всего приложения -->
+    <div id="app-container">
+
+        <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ (виден по умолчанию) -->
+        <div id="home-screen" class="screen active">
+            <header>
+                <h1>TrainPlan</h1>
+                <p>Привет, <span id="user-name"></span>! Готов к тренировке? 🏋️</p>
+            </header>
+            <div class="menu">
+                <button id="menu-plan-btn" class="menu-button">📅 Мой План</button>
+                <button id="menu-profile-btn" class="menu-button">👤 Профиль</button>
+                <button id="menu-settings-btn" class="menu-button" disabled>⚙️ Настройки</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: ПЛАН НА НЕДЕЛЮ (скрыт) -->
+        <div id="plan-screen" class="screen">
+            <header>
+                <button class="back-button">← Назад</button>
+                <h2>📅 План на неделю</h2>
+            </header>
+            <div id="week-plan-container">
+                <!-- Карточки дней недели будут созданы здесь с помощью JS -->
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: ПРОФИЛЬ (скрыт) -->
+        <div id="profile-screen" class="screen">
+            <header>
+                <button class="back-button">← Назад</button>
+                <h2>👤 Профиль</h2>
+            </header>
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <h3>Завершено дней</h3>
+                    <p id="stat-days">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Завершено недель</h3>
+                    <p id="stat-weeks">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Прогресс недели</h3>
+                    <p id="stat-progress">0/7</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО для добавления/просмотра упражнений (скрыто) -->
+    <div id="day-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-day-title">Упражнения на ...</h3>
+            <div id="exercises-list">
+                <!-- Список упражнений будет здесь -->
+            </div>
+            <form id="add-exercise-form">
+                <input type="text" id="ex-name" placeholder="Название упражнения" required>
+                <input type="number" id="ex-sets" placeholder="Подходы" required>
+                <input type="text" id="ex-reps" placeholder="Повторения (напр. 12 или 30 сек)" required>
+                <button type="submit">Добавить упражнение</button>
+            </form>
+            <button id="modal-close-btn">Закрыть</button>
+        </div>
+    </div>
+
+
+    <!-- Подключение API Telegram (ОБЯЗАТЕЛЬНО) -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Подключение нашего скрипта с логикой -->
+    <script src="script.js"></script>
+</body>
+</html>
